@@ -21,6 +21,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from flask import current_app
+import random
 
 
 def get_db():
@@ -37,6 +38,22 @@ def get_db():
 app = Flask(__name__)
 app.secret_key = "supersecret"  # change in production
 
+from twilio.rest import Client
+
+# Twilio credentials (from console)
+account_sid = "ACc1b4158045f261a8cb58792d620d11fd"
+auth_token = "fa323539bcd623644474800f7ef6a154"
+twilio_number = "+17627950927"   # Your Twilio phone number
+
+client = Client(account_sid, auth_token)
+
+def send_otp(phone_number, otp):
+    message = client.messages.create(
+        body=f"Your OTP code is {otp}",
+        from_=twilio_number,
+        to=phone_number
+    )
+    return message.sid
 
 
 # -------------------- Admin Blueprint --------------------
@@ -111,6 +128,10 @@ def before_admin_request():
 
 @admin_bp.route("/login",methods=["GET","POST"])
 def login():
+    try:
+        message=request.args.get("message")
+    except:
+        message=None
     if request.method == "POST":
         un=request.form['username']
         ps=request.form['password']
@@ -128,16 +149,66 @@ def login():
             return redirect(url_for("admin.dashboard"))
         else:
             # print(un)
-            return render_template("admin_login.html",error=True)
-    return render_template("admin_login.html",error=False)
+            return render_template("admin_login.html",error=True,message=message)
+    return render_template("admin_login.html",error=False,message=message)
 
-@admin_bp.route("/forget_password")
+@admin_bp.route("/forget_password", methods=["GET","POST"])
 def forget_password():
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM login")
+    k = cursor.fetchall()[0]
+    cursor.close()
+    print(k)
     if request.method == "POST":
-        return "<h1>hi2</h1>"
-    return render_template("forget_password.html")
+        try:
+            phone = int(request.form["phone"])
+        except:
+            return render_template("forget_password.html", val=str(k['phone_number'])[-4:], error=True)
+        if phone==k['phone_number']:
+            session["otp"] = str(random.randint(100000, 999999))
+            send_otp("+91"+str(phone), session["otp"])
+            return render_template("verify_otp.html",error=False)
+        else:
+            return render_template("forget_password.html",val=str(k['phone_number'])[-4:],error=True)
+    return render_template("forget_password.html",val=str(k['phone_number'])[-4:],error=False)
 
+@app.route("/verify_otp",methods=["POST"])
+def verify_otp():
+    try:
+        otp = request.form['otp']
+    except:
+        return render_template("verify_otp.html",error=True)
+    
+    if otp==session['otp']:
+        return render_template("reset_password.html",error=False)
+    
+    return render_template("verify_otp.html",error=True)
 
+@app.route("/reset_password",methods=["POST"])
+def reset_password():
+    type=request.form['account_type']
+    password = request.form['new_password']
+    confirm_password = request.form['confirm_password']
+    if type=="":
+        return render_template("reset_password.html",error=True,message="Select proper account type")
+    elif password!=confirm_password:
+        return render_template("reset_password.html",error=True,message="Passwords and Confirm Password do not match")
+    else:
+        db=get_db()
+        cursor = db.cursor(dictionary=True)
+        if type=="kitchen":
+            cursor.execute(f"UPDATE login SET kitchen_password='{password}'")
+        elif type=="admin":
+            cursor.execute(f"UPDATE login SET Pass='{password}'")
+        db.commit()
+        cursor.close()
+        session.pop("otp", None)
+        flash(" password reset successfully. Please login.", "success")
+        return redirect(url_for("admin.login",message="Password reset successful"))
+        
+        
+        
 # In main.py, within the admin_bp blueprint
 
 from datetime import date, timedelta
@@ -1255,9 +1326,9 @@ def home():
     return redirect(url_for("customer.customer_menu",table="1"))
 @app.route("/admin")
 def admin():
-    return (redirect(url_for("admin.dashboard"))
+    return redirect(url_for("admin.dashboard"))
 
-@app.route("/kitchen"))
+@app.route("/kitchen")
 def kitchen():
     return redirect(url_for("kitchen.orders"))
 

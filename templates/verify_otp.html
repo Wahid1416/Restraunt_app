@@ -112,16 +112,16 @@
         <h2>Forgot Password</h2>
         {% if error %}
             <div class="error-message">
-                Invalid Phone Number
+                Invalid OTP
             </div>
         {% endif %}
-        <form method="POST" action="{{ url_for('admin.forget_password') }}">
-            <label>Enter registered phone number:</label>
-            <input type="text" name="phone" placeholder="{{ 'XXXXXX' ~ val }}" required>
+        <form method="POST" action="{{ url_for('verify_otp') }}">
+            <label>Enter your OTP:</label>
+            <input type="text" name="otp" placeholder="XXXXXX" required>
             <button type="submit">Reset Password</button>
         </form>
 
-        <p><a href="{{ url_for('admin.login') }}">⬅ Back to Login</a></p>
+        <p><a href="{{ url_for('admin.forget_password') }}">⬅ Back to Phone Number</a></p>
 
     </div>
 </body>

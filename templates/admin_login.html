@@ -100,6 +100,11 @@
                 Invalid Username or Password
             </div>
         {% endif %}
+        {% if message %}
+            <div class="error-message">
+                {{message}}
+            </div>
+        {% endif %}
 
         <form method="POST" action="{{ url_for('admin.login') }}">
             <label>Username:</label>
