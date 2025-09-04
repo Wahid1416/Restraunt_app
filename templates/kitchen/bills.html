@@ -1,0 +1,64 @@
+{% extends "base_kitchen.html" %}
+
+{% block title %}Bills{% endblock %}
+{% block page_title %}Generate Bills{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    {% for table_no, order in orders.items() %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Table: {{ table_no }} <span class="badge bg-light text-dark">#{{ order.order_ids|join(', ') }}</span></h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush mb-3">
+                    {% for item in order["items"] %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <strong>{{ item.dish_name }}</strong> ({{ item.type }})
+                        </div>
+                        <div>
+                            {{ item.quantity }}x @ ₹{{ "%.2f"|format(item.Price) }}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Total:</h5>
+                    <h5 class="mb-0">₹{{ "%.2f"|format(order.total_price) }}</h5>
+                </div>
+                <form method="POST" action="{{ url_for('kitchen.finalize_bill') }}">
+                    <input type="hidden" name="table_no" value="{{ table_no }}">
+                    <div class="input-group mb-2">
+                        <label for="payment_type_{{ table_no }}" class="input-group-text">Payment</label>
+                        <select name="payment_type" id="payment_type_{{ table_no }}" class="form-select" required>
+                            {% for type in payment_types %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('kitchen.generate_bill_pdf', table_no=table_no) }}" class="btn btn-primary">Download Bill PDF</a>
+                        <button type="submit" class="btn btn-success">Finalize & Pay</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            No completed orders to bill.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block styles %}
+<style>
+    .card-header, .card-footer {
+        border-color: #e9ecef;
+    }
+</style>
+{% endblock %}

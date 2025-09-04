@@ -1,0 +1,124 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Sales Analytics{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Daily Sales Trends (Last 30 Days)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dailySalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Revenue by Payment Type</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="paymentRevenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Top 5 Best-Selling Dishes</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="topDishesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Daily Sales Chart
+        const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
+        new Chart(dailySalesCtx, {
+            type: 'line',
+            data: {
+                labels: {{ daily_sales_labels|tojson }},
+                datasets: [{
+                    label: 'Total Sales (₹)',
+                    data: {{ daily_sales_values|tojson }},
+                    borderColor: '#2575fc',
+                    backgroundColor: 'rgba(37, 117, 252, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Payment Revenue Chart
+        const paymentRevenueCtx = document.getElementById('paymentRevenueChart').getContext('2d');
+        new Chart(paymentRevenueCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ payment_labels|tojson }},
+                datasets: [{
+                    label: 'Revenue by Payment Type',
+                    data: {{ payment_values|tojson }},
+                    backgroundColor: [
+                        '#28a745', // green for success
+                        '#007bff', // blue for primary
+                        '#ffc107', // yellow for warning
+                        '#6f42c1', // purple
+                        '#dc3545'  // red for danger
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Top Dishes Chart
+        const topDishesCtx = document.getElementById('topDishesChart').getContext('2d');
+        new Chart(topDishesCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ top_dishes_labels|tojson }},
+                datasets: [{
+                    label: 'Items Sold',
+                    data: {{ top_dishes_values|tojson }},
+                    backgroundColor: '#6a11cb',
+                    borderColor: '#6a11cb',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+<style>
+    /* CSS for the analytics page */
+</style>

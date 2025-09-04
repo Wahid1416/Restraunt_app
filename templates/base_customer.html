@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control">
+    <meta content="no-cache" http-equiv="Pragma">
+    <meta content="0" http-equiv="Expires">
+    <title>{% block title %}Customer Menu{% endblock %}</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #6a11cb;
+            --secondary-color: #2575fc;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --card-bg: #fff;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--text-color);
+        }
+
+        .navbar {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar-brand, .navbar-text {
+            color: white !important;
+            font-weight: bold;
+        }
+
+        /* Styles for Category Navigation */
+        .scrolling-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        /* For WebKit browsers (Chrome, Safari) */
+        .scrolling-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-list {
+            display: inline-flex;
+            gap: 10px;
+        }
+
+        .category-list .nav-item {
+            flex-shrink: 0;
+        }
+
+        .category-list .nav-link {
+            background-color: #e9ecef;
+            color: #495057;
+            border-radius: 20px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-left: 10px;
+            margin-bottom: 10px;
+            margin-top: 5px;
+        }
+
+        .category-list .nav-link.active {
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+            transform: scale(1.05);
+        }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            background-color: var(--card-bg);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-add {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0.5rem 1.5rem;
+            transition: background-color 0.2s ease;
+        }
+        .btn-add:hover {
+            background-color: #c82333;
+        }
+
+        .quantity-btn-group {
+            display: flex;
+            align-items: center;
+            border: 2px solid #dc3545;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .quantity-btn {
+            background-color: white;
+            color: #dc3545;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .quantity-input {
+            width: 40px;
+            text-align: center;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .fixed-bottom {
+            z-index: 1020;
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg mb-0">
+    <div class="container-fluid">
+        <a class="navbar-brand me-auto" href="{{ url_for('customer.customer_menu', table=table_number) }}">🍽️ Restaurant Menu</a>
+        {% if table_number %}
+        <span class="navbar-text">
+            Table: <strong>{{ table_number }}</strong>
+        </span>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container pb-4">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+</script>
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,50 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Dashboard | Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card text-bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Today’s Sales</h5>
+                <p class="card-text">₹{{ "%.2f"|format(sales_today) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card text-bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Yesterday’s Sales</h5>
+                <p class="card-text">₹{{ "%.2f"|format(sales_yesterday) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('salesChart');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|tojson }},
+            datasets: [{
+                label: 'Daily Sales',
+                data: {{ chart_data|tojson }},
+                borderColor: 'rgba(54, 162, 235, 1)',
+                tension: 0.3
+            }]
+        }
+    });
+</script>
+{% endblock %}

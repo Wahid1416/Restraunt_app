@@ -1,0 +1,323 @@
+{% extends "base_customer.html" %}
+
+{% block title %}Menu{% endblock %}
+{% block page_title %}Menu{% endblock %}
+
+{% block content %}
+
+<div class="sticky-top pt-3 pb-2" style="top: 56px; z-index: 999;">
+    <div class="scrolling-wrapper">
+        <div class="category-container">
+            <ul class="nav nav-pills category-list d-inline-flex flex-nowrap">
+                {% for cat in categories %}
+                <li class="nav-item">
+                    <a class="nav-link {% if cat.name == selected_category %}active{% endif %}"
+                       href="{{ url_for('customer.customer_menu', category=cat.name, table=table_number) }}">
+                        {{ cat.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="dish-list-section mb-5">
+    <h3 class="text-success mb-4">
+        <img src="{{ url_for('static', filename='icons/veg.svg') }}" style="width:28px; height:28px; vertical-align: middle;" alt="Veg Icon">
+        Vegetarian Dishes
+    </h3>
+    {% if dishes|selectattr('is_veg', 'equalto', 1)|list %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for dish in dishes|selectattr('is_veg', 'equalto', 1) %}
+        <div class="col">
+            <div class="card h-100 position-relative">
+                <img alt="{{ dish.name }}" class="card-img-top" src="{{ url_for('static', filename='images/' ~ dish.image) }}" style="height: 180px; object-fit: cover;">
+                <img src="{{ url_for('static', filename='icons/veg.svg') }}" style="position: absolute; top: 12px; left: 12px; width:28px; height:28px;" alt="Veg">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold">{{ dish.name }}</h5>
+                    <p class="card-text text-muted mb-3">{{ dish.description|default("", true) }}</p>
+                    <div class="mt-auto">
+                        <div class="price-options d-flex flex-column gap-2 mb-3">
+                            {% if dish.half_price %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge text-bg-secondary">Half: ₹{{ dish.half_price }}</span>
+                                <div class="add-portion-container" data-dish-id="{{ dish.id }}" data-portion="half" data-price="{{ dish.half_price }}" data-dish-name="{{ dish.name }}" data-dish-image="{{ dish.image }}">
+                                    <button class="btn btn-primary btn-sm add-portion-btn">Add +</button>
+                                    <div class="input-group quantity-buttons d-none">
+                                        <button class="btn btn-primary btn-sm decrease-quantity" type="button">-</button>
+                                        <input type="text" class="form-control form-control-sm text-center quantity-display" value="0" readonly>
+                                        <button class="btn btn-primary btn-sm increase-quantity" type="button">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if dish.full_price %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge text-bg-secondary">Full: ₹{{ dish.full_price }}</span>
+                                <div class="add-portion-container" data-dish-id="{{ dish.id }}" data-portion="full" data-price="{{ dish.full_price }}" data-dish-name="{{ dish.name }}" data-dish-image="{{ dish.image }}">
+                                    <button class="btn btn-primary btn-sm add-portion-btn">Add +</button>
+                                    <div class="input-group quantity-buttons d-none">
+                                        <button class="btn btn-primary btn-sm decrease-quantity" type="button">-</button>
+                                        <input type="text" class="form-control form-control-sm text-center quantity-display" value="0" readonly>
+                                        <button class="btn btn-primary btn-sm increase-quantity" type="button">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if dish.single_price and not dish.half_price and not dish.full_price %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge text-bg-secondary">₹{{ dish.single_price }}</span>
+                                <div class="add-portion-container" data-dish-id="{{ dish.id }}" data-portion="single" data-price="{{ dish.single_price }}" data-dish-name="{{ dish.name }}" data-dish-image="{{ dish.image }}">
+                                    <button class="btn btn-primary btn-sm add-portion-btn">Add +</button>
+                                    <div class="input-group quantity-buttons d-none">
+                                        <button class="btn btn-primary btn-sm decrease-quantity" type="button">-</button>
+                                        <input type="text" class="form-control form-control-sm text-center quantity-display" value="0" readonly>
+                                        <button class="btn btn-primary btn-sm increase-quantity" type="button">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No vegetarian dishes available in this category.</p>
+    {% endif %}
+</div>
+
+<hr>
+
+<div class="dish-list-section">
+    <h3 class="text-danger mb-4">
+        <img src="{{ url_for('static', filename='icons/nonveg.svg') }}" style="width:28px; height:28px; vertical-align: middle;" alt="Non-Veg Icon">
+        Non-Vegetarian Dishes
+    </h3>
+    {% if dishes|selectattr('is_veg', 'equalto', 0)|list %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for dish in dishes|selectattr('is_veg', 'equalto', 0) %}
+        <div class="col">
+            <div class="card h-100 position-relative">
+                <img alt="{{ dish.name }}" class="card-img-top" src="{{ url_for('static', filename='images/' ~ dish.image) }}" style="height: 180px; object-fit: cover;">
+                <img src="{{ url_for('static', filename='icons/nonveg.svg') }}" style="position: absolute; top: 12px; left: 12px; width:28px; height:28px;" alt="Non-Veg">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold">{{ dish.name }}</h5>
+                    <p class="card-text text-muted mb-3">{{ dish.description|default("", true) }}</p>
+                    <div class="mt-auto">
+                        <div class="price-options d-flex flex-column gap-2 mb-3">
+                            {% if dish.half_price %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge text-bg-secondary">Half: ₹{{ dish.half_price }}</span>
+                                <div class="add-portion-container" data-dish-id="{{ dish.id }}" data-portion="half" data-price="{{ dish.half_price }}" data-dish-name="{{ dish.name }}" data-dish-image="{{ dish.image }}">
+                                    <button class="btn btn-primary btn-sm add-portion-btn">Add +</button>
+                                    <div class="input-group quantity-buttons d-none">
+                                        <button class="btn btn-primary btn-sm decrease-quantity" type="button">-</button>
+                                        <input type="text" class="form-control form-control-sm text-center quantity-display" value="0" readonly>
+                                        <button class="btn btn-primary btn-sm increase-quantity" type="button">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if dish.full_price %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge text-bg-secondary">Full: ₹{{ dish.full_price }}</span>
+                                <div class="add-portion-container" data-dish-id="{{ dish.id }}" data-portion="full" data-price="{{ dish.full_price }}" data-dish-name="{{ dish.name }}" data-dish-image="{{ dish.image }}">
+                                    <button class="btn btn-primary btn-sm add-portion-btn">Add +</button>
+                                    <div class="input-group quantity-buttons d-none">
+                                        <button class="btn btn-primary btn-sm decrease-quantity" type="button">-</button>
+                                        <input type="text" class="form-control form-control-sm text-center quantity-display" value="0" readonly>
+                                        <button class="btn btn-primary btn-sm increase-quantity" type="button">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if dish.single_price and not dish.half_price and not dish.full_price %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge text-bg-secondary">₹{{ dish.single_price }}</span>
+                                <div class="add-portion-container" data-dish-id="{{ dish.id }}" data-portion="single" data-price="{{ dish.single_price }}" data-dish-name="{{ dish.name }}" data-dish-image="{{ dish.image }}">
+                                    <button class="btn btn-primary btn-sm add-portion-btn">Add +</button>
+                                    <div class="input-group quantity-buttons d-none">
+                                        <button class="btn btn-primary btn-sm decrease-quantity" type="button">-</button>
+                                        <input type="text" class="form-control form-control-sm text-center quantity-display" value="0" readonly>
+                                        <button class="btn btn-primary btn-sm increase-quantity" type="button">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No non-vegetarian dishes available in this category.</p>
+    {% endif %}
+</div>
+
+<div style="height: 100px;"></div>
+<div class="fixed-bottom bg-light p-2 shadow-lg">
+  <!-- Bottom toolbar for Order Status -->
+<div class="fixed-bottom bg-light p-2 shadow-lg d-flex justify-content-center">
+  <a class="btn btn-success w-100"
+     href="{{ url_for('customer.order_status', table_no=table_number) }}"
+     style="padding: 0.7rem; font-size: 0.9rem;">
+    <i class="bi bi-list-check me-1"></i> Order Status
+  </a>
+<!-- Bottom toolbar for Order Status -->
+<div class="fixed-bottom bg-light p-2 shadow-lg d-flex justify-content-center">
+  <a class="btn btn-success w-100"
+     href="{{ url_for('customer.order_status', table=table_number) }}"
+     style="padding: 0.7rem; font-size: 0.9rem;">
+    <i class="bi bi-list-check me-1"></i> Order Status
+  </a>
+</div>
+
+<!-- Floating Rectangle Button for Order -->
+<button id="order-button"
+        class="btn btn-danger shadow-lg rounded-pill px-3 py-2"
+        style="position: fixed; bottom: 70px; right: 20px; font-size: 1.3rem;">
+  <i class="bi bi-cart me-0.5"></i> Order
+</button>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let cart = {{ cart|tojson }};
+        const tableNumber = "{{ table_number }}";
+
+        function sendCartToServer() {
+            fetch("{{ url_for('customer.add_to_cart') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    table: tableNumber,
+                    cart: cart
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cart saved to server:', data);
+            })
+            .catch(error => console.error('Error saving cart:', error));
+        }
+
+        // Function to update the UI for a specific portion container
+        function updatePortionUI(container, quantity) {
+            const addButton = container.querySelector('.add-portion-btn');
+            const quantityButtons = container.querySelector('.quantity-buttons');
+            const quantityDisplay = container.querySelector('.quantity-display');
+
+            if (quantity > 0) {
+                addButton.classList.add('d-none');
+                quantityButtons.classList.remove('d-none');
+                quantityDisplay.value = quantity;
+            } else {
+                addButton.classList.remove('d-none');
+                quantityButtons.classList.add('d-none');
+                quantityDisplay.value = 0;
+            }
+        }
+
+        // Initialize UI on page load based on loaded cart data
+        document.querySelectorAll('.add-portion-container').forEach(container => {
+            const dishId = container.dataset.dishId;
+            const portion = container.dataset.portion;
+            const itemKey = `${dishId}_${portion}`;
+            const quantity = cart[itemKey] ? cart[itemKey].quantity : 0;
+            updatePortionUI(container, quantity);
+        });
+
+        // Add to cart buttons
+        document.querySelectorAll('.add-portion-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const container = this.closest('.add-portion-container');
+                const dishId = container.dataset.dishId;
+                const portion = container.dataset.portion;
+                const price = container.dataset.price;
+                const dishName = container.dataset.dishName;
+                const dishImage = container.dataset.dishImage;
+                const itemKey = `${dishId}_${portion}`;
+
+                if (!cart[itemKey]) {
+                    cart[itemKey] = {
+                        id: dishId,
+                        name: dishName,
+                        portion: portion,
+                        price: parseFloat(price),
+                        image: dishImage,
+                        quantity: 1
+                    };
+                } else {
+                    cart[itemKey].quantity++;
+                }
+
+                updatePortionUI(container, cart[itemKey].quantity);
+                sendCartToServer();
+            });
+        });
+
+        // Increase quantity buttons
+        document.querySelectorAll('.increase-quantity').forEach(button => {
+            button.addEventListener('click', function() {
+                const container = this.closest('.add-portion-container');
+                const dishId = container.dataset.dishId;
+                const portion = container.dataset.portion;
+                const itemKey = `${dishId}_${portion}`;
+
+                if (cart[itemKey]) {
+                    cart[itemKey].quantity++;
+                    updatePortionUI(container, cart[itemKey].quantity);
+                    sendCartToServer();
+                }
+            });
+        });
+
+        // Decrease quantity buttons
+        document.querySelectorAll('.decrease-quantity').forEach(button => {
+            button.addEventListener('click', function() {
+                const container = this.closest('.add-portion-container');
+                const dishId = container.dataset.dishId;
+                const portion = container.dataset.portion;
+                const itemKey = `${dishId}_${portion}`;
+
+                if (cart[itemKey] && cart[itemKey].quantity > 1) {
+                    cart[itemKey].quantity--;
+                } else if (cart[itemKey] && cart[itemKey].quantity === 1) {
+                    delete cart[itemKey];
+                }
+
+                updatePortionUI(container, cart[itemKey] ? cart[itemKey].quantity : 0);
+                sendCartToServer();
+            });
+        });
+
+        // Order button logic
+        document.getElementById('order-button').addEventListener('click', function() {
+            fetch("{{ url_for('customer.add_to_cart') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ table: tableNumber, cart: cart })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    window.location.href = "{{ url_for('customer.checkout') }}?table=" + tableNumber;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base_kitchen.html" %}
+
+{% block title %}Current Orders{% endblock %}
+{% block page_title %}Current Orders{% endblock %}
+
+{% block content %}
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h3>Orders</h3>
+    <form method="POST" action="{{ url_for('kitchen.reset_order_id') }}">
+        {% if is_table_empty %}
+            <button type="submit" class="btn btn-warning">Reset Order Table</button>
+        {% else %}
+            <p class="text-muted mb-0">Order table is not empty. Cannot reset.</p>
+        {% endif %}
+    </form>
+</div>
+
+<div id="orders-container" class="row g-4">
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ordersContainer = document.getElementById('orders-container');
+        let pollingInterval;
+
+        async function fetchOrders() {
+            try {
+                const response = await fetch("{{ url_for('kitchen.orders_json') }}");
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const orders = await response.json();
+                renderOrders(orders);
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        }
+
+        function renderOrders(orders) {
+            let html = '';
+            const orderIds = Object.keys(orders);
+
+            if (orderIds.length === 0) {
+                html = `<div class="col-12"><div class="alert alert-info text-center" role="alert">No current orders.</div></div>`;
+            } else {
+                for (const orderId of orderIds) {
+                    const order = orders[orderId];
+                    let itemsHtml = '';
+                    for (const item of order.items) {
+                        itemsHtml += `
+                            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                <div class="flex-grow-1 me-2">
+                                    <h6 class="mb-0">${item.dish_name}</h6>
+                                    <small class="text-muted">${item.type}</small>
+                                    ${item.message ? `<br><small class="text-danger fw-semibold fst-italic ">Request: ${item.message}</small>` : ''}
+                                </div>
+                                <div class="d-flex align-items-center item-actions">
+                                    <span class="current-quantity me-2">Quantity: ${item.quantity}</span>
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1 edit-quantity-btn" data-item-id="${item.id}" data-current-quantity="${item.quantity}" title="Edit Quantity">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <form method="POST" action="{{ url_for('kitchen.orders') }}" class="d-inline-block">
+                                        <input type="hidden" name="item_id" value="${item.id}">
+                                        <button type="submit" name="delete_item" class="btn btn-outline-danger btn-sm" title="Delete Item">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="edit-quantity-form d-none mt-2 w-100">
+                                    <form method="POST" action="{{ url_for('kitchen.orders') }}" class="d-flex">
+                                        <input type="hidden" name="item_id" value="${item.id}">
+                                        <input type="number" name="quantity" value="${item.quantity}" class="form-control form-control-sm text-center me-2">
+                                        <button type="submit" name="update_quantity" class="btn btn-sm btn-primary">Update</button>
+                                        <button type="button" class="btn btn-sm btn-secondary ms-1 cancel-edit-btn">Cancel</button>
+                                    </form>
+                                </div>
+                            </li>
+                        `;
+                    }
+                    html += `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Table: ${order.table_no}</h5>
+                                    <span class="badge bg-light text-dark">#${orderId}</span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        ${itemsHtml}
+                                    </ul>
+                                </div>
+                                <div class="card-footer d-flex justify-content-between align-items-center">
+                                    <form method="POST" action="{{ url_for('kitchen.orders') }}" class="flex-grow-1 d-flex align-items-center">
+                                        <input type="hidden" name="order_id" value="${orderId}">
+                                        <select name="new_status" class="form-select form-select-sm me-2">
+                                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="In Progress" ${order.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                            <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                        </select>
+                                        <button type="submit" name="update_status" class="btn btn-success btn-sm">Update</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            ordersContainer.innerHTML = html;
+        }
+
+        function startPolling() {
+            clearInterval(pollingInterval);
+            fetchOrders();
+            pollingInterval = setInterval(fetchOrders, 5000);
+        }
+
+        ordersContainer.addEventListener('click', function(e) {
+            const targetButton = e.target.closest('button');
+            if (!targetButton) return;
+
+            if (targetButton.classList.contains('edit-quantity-btn')) {
+                clearInterval(pollingInterval);
+                const li = targetButton.closest('li');
+                const actionsDiv = li.querySelector('.item-actions');
+                const editFormDiv = li.querySelector('.edit-quantity-form');
+                actionsDiv.classList.add('d-none');
+                editFormDiv.classList.remove('d-none');
+                e.preventDefault();
+            }
+            else if (targetButton.classList.contains('cancel-edit-btn')) {
+                startPolling();
+                const li = targetButton.closest('li');
+                const actionsDiv = li.querySelector('.item-actions');
+                const editFormDiv = li.querySelector('.edit-quantity-form');
+                editFormDiv.classList.add('d-none');
+                actionsDiv.classList.remove('d-none');
+                e.preventDefault();
+            }
+            else if (e.target.tagName === 'FORM' || e.target.closest('button[type="submit"]')) {
+                startPolling();
+            }
+        });
+
+        startPolling();
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .card-header, .card-footer {
+        border-color: #e9ecef;
+    }
+    .card-footer select {
+        width: auto;
+    }
+</style>
+{% endblock %}

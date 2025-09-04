@@ -1,0 +1,66 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Edit Dish{% endblock %}
+{% block page_title %}Edit Dish{% endblock %}
+
+{% block content %}
+<div class="card p-4 shadow-sm">
+    <form method="POST">
+        <!-- Dish Name -->
+        <div class="mb-3">
+            <label class="form-label">Dish Name</label>
+            <input type="text" class="form-control" name="name" value="{{ dish.name }}" required>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select" required>
+                {% for cat in categories %}
+                    <option value="{{ cat.name }}" {% if dish.category_name == cat.name %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Veg / Non-Veg -->
+        <div class="mb-3">
+            <label class="form-label">Type</label>
+            <select name="is_veg" class="form-select" required>
+                <option value="1" {% if dish.is_veg %}selected{% endif %}>Veg</option>
+                <option value="0" {% if not dish.is_veg %}selected{% endif %}>Non-Veg</option>
+            </select>
+        </div>
+
+        <!-- Prices -->
+        <div class="mb-3 row">
+            <div class="col">
+                <label class="form-label">Half Price</label>
+                <input type="number" class="form-control" name="half_price" value="{{ dish.half_price }}">
+            </div>
+            <div class="col">
+                <label class="form-label">Full Price</label>
+                <input type="number" class="form-control" name="full_price" value="{{ dish.full_price }}">
+            </div>
+            <div class="col">
+                <label class="form-label">Single Price</label>
+                <input type="number" class="form-control" name="single_price" value="{{ dish.single_price }}">
+            </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="available" id="available" {% if dish.available %}checked{% endif %}>
+            <label class="form-check-label" for="available">Available</label>
+        </div>
+
+        <!-- Buttons -->
+        <button type="submit" class="btn btn-success">Update Dish</button>
+        <a href="{{ url_for('admin.delete_dish', id=dish.id) }}" class="btn btn-danger ms-2"
+           onclick="return confirm('Are you sure you want to delete this dish?');">
+           Delete Dish
+        </a>
+    </form>
+</div>
+{% endblock %}

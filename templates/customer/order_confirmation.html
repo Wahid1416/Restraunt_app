@@ -1,0 +1,37 @@
+{% extends "base_customer.html" %}
+
+{% block title %}Order Confirmed{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="card shadow-lg p-5">
+        <div class="checkmark-circle mx-auto mb-4">
+            <i class="bi bi-check-lg text-success"></i>
+        </div>
+        <h2 class="text-success mb-3">Order Placed Successfully!</h2>
+        <p class="lead">Your order has been sent to the kitchen. Please wait for the food to arrive.</p>
+        {% if order_id %}
+        <p class="h4 mt-4">Order ID: <strong>#{{ order_id }}</strong></p>
+        {% endif %}
+        <div class="mt-5">
+            <a href="{{ url_for('customer.customer_menu', table=table_number) }}" class="btn btn-primary btn-lg">Back to Menu</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .checkmark-circle {
+        font-size: 80px;
+        color: #fff;
+        background-color: #28a745;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

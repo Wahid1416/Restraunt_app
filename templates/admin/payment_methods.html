@@ -1,0 +1,45 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Payment Methods{% endblock %}
+{% block page_title %}Payment Methods{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Add New Payment Method</h5>
+        <form method="POST" action="{{ url_for('admin.payment_methods') }}">
+            <div class="input-group">
+                <input type="text" name="name" class="form-control" placeholder="e.g., Cash, Card, UPI" required>
+                <button type="submit" name="add_method" class="btn btn-success">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">Existing Payment Methods</h5>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for method in methods %}
+                <tr>
+                    <td>{{ method }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.payment_methods') }}" style="display:inline;">
+                            <input type="hidden" name="method_id" value="{{ method.id }}">
+                            <button type="submit" name="delete_method" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this payment method?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

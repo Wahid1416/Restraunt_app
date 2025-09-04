@@ -1,0 +1,40 @@
+{% extends "base_customer.html" %}
+
+{% block title %}Order Status{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="card shadow-lg p-5">
+        <h2 class="mb-4">Order Status</h2>
+        
+        {% if status == 'No Order Found' %}
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">No Order Found!</h4>
+            <p>We could not find any active orders for table: <strong>{{ table_no }}</strong>.</p>
+        </div>
+        {% else %}
+        <p class="lead">Table: <strong>#{{ table_no }}</strong></p>
+        
+        <div class="mt-4">
+            <h4>Current Status:</h4>
+            {% if status == 'Ready for Billing' %}
+            <span class="badge bg-success fs-5">{{ status }}</span>
+            <p class="mt-2 text-muted">Your food is ready!</p>
+            {% elif status == 'Completed & Paid' %}
+            <span class="badge bg-dark fs-5">{{ status }}</span>
+            <p class="mt-2 text-muted">This order has been completed and billed.</p>
+            {% elif status == 'In Progress' %}
+            <span class="badge bg-warning text-dark fs-5">{{ status }}</span>
+            <p class="mt-2 text-muted">The kitchen is preparing your order.</p>
+            {% else %}
+            <span class="badge bg-info fs-5">{{ status }}</span>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="mt-5">
+            <a href="{{ url_for('customer.customer_menu', table=table_no) }}" class="btn btn-primary btn-lg">Back to Menu</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

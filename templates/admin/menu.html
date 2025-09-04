@@ -1,0 +1,86 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Menu Management{% endblock %}
+{% block page_title %}Menu Management{% endblock %}
+
+{% block content %}
+<!-- Category Navigation -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <ul class="nav nav-pills">
+        {% for cat in categories %}
+        <li class="nav-item">
+            <a class="nav-link {% if cat == selected_category %}active{% endif %}"
+               href="{{ url_for('admin.menu', category=cat) }}">
+                {{ cat }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    <a class="btn btn-primary btn-sm ms-3" href="{{ url_for('admin.categories_page') }}">
+        <i class="bi bi-plus"></i> Add Category
+    </a>
+</div>
+
+<!-- Dish Display -->
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">{{ selected_category }} Dishes</h4>
+        <a class="btn btn-success btn-sm" href="{{ url_for('admin.add_dish') }}">
+            <i class="bi bi-plus-circle"></i> Add Dish
+        </a>
+    </div>
+
+    {% if dishes %}
+    <div class="row g-4">
+        {% for dish in dishes %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm h-100 position-relative">
+                <!-- Dish Image -->
+                <img alt="{{ dish.name }}"
+                     class="card-img-top"
+                     src="{{ url_for('static', filename='images/' ~ dish.image) }}"
+                     style="height: 200px; object-fit: cover;">
+
+                <!-- Veg/Non-Veg Icon -->
+                <img class="position-absolute top-0 start-0 m-2"
+                     {% if dish.is_veg %}src="{{ url_for('static', filename='icons/veg.svg') }}"
+                     {% else %}src="{{ url_for('static', filename='icons/nonveg.svg') }}"{% endif %}
+                     alt="Veg" width="24">
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ dish.name }}</h5>
+
+                    <!-- Prices and Availability in same row -->
+                    <div class="d-flex justify-content-between align-items-center mb-0">
+                        <p class="mb-0">
+                            {% if dish.half_price %}Half: ₹{{ dish.half_price }}{% if dish.full_price or dish.single_price %} | {% endif %}{% endif %}
+                            {% if dish.full_price %}Full: ₹{{ dish.full_price }}{% if dish.single_price %} | {% endif %}{% endif %}
+                            {% if dish.single_price %}₹{{ dish.single_price }}{% endif %}
+                        </p>
+                        <span class="badge {% if dish.available %}bg-success{% else %}bg-danger{% endif %}">
+                            {% if dish.available %}Available{% else %}Not Available{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Edit/Delete Buttons -->
+                    <div class="mt-auto d-flex justify-content-between">
+                        <a class="btn btn-sm btn-warning me-2"
+                           href="{{ url_for('admin.edit_dish', id=dish.id) }}">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a class="btn btn-sm btn-danger"
+                           href="{{ url_for('admin.delete_dish', id=dish.id) }}"
+                           onclick="return confirm('Are you sure you want to delete this dish?');">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No dishes found in this category.</p>
+    {% endif %}
+</div>
+{% endblock %}

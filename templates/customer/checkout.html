@@ -1,0 +1,185 @@
+{% extends "base_customer.html" %}
+
+{% block title %}Your Order{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h2>Your Order</h2>
+            {% if table_number %}
+            <p class="text-muted">Table: <strong>{{ table_number }}</strong></p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if cart_items %}
+    <div class="row g-3">
+        {% for item in cart_items %}
+        <div class="col-12" id="item-{{ item.id }}-{{ item.portion }}">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex align-items-center p-2">
+                    <img alt="{{ item.name }}"
+                         class="rounded-circle me-2"
+                         src="{{ url_for('static', filename='images/' ~ item.image) }}"
+                         style="width: 50px; height: 50px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <h6 class="card-title mb-0">{{ item.name }}</h6>
+                        <small class="text-muted">{{ item.portion }}</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="input-group quantity-buttons me-2" style="width: 80px;">
+                            <button class="btn btn-primary btn-sm decrease-quantity" data-item-key="{{ item.id }}_{{ item.portion }}"
+                                    type="button">-
+                            </button>
+                            <input class="form-control form-control-sm text-center quantity-display" readonly
+                                   type="text" value="{{ item.quantity }}">
+                            <button class="btn btn-primary btn-sm increase-quantity" data-item-key="{{ item.id }}_{{ item.portion }}"
+                                    type="button">+
+                            </button>
+                        </div>
+                        <h6 class="mb-0 text-primary ms-1">₹<span class="item-subtotal">{{ "%.2f"|format(item.price * item.quantity) }}</span>
+                        </h6>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 pt-0 pb-2">
+                    <label for="request-{{ item.id }}-{{ item.portion }}" class="form-label mb-1">Specific Requests:</label>
+                    <textarea class="form-control form-control-sm item-request"
+                              id="request-{{ item.id }}-{{ item.portion }}"
+                              rows="1"
+                              placeholder="e.g., no onion, extra spicy"
+                              data-item-key="{{ item.id }}_{{ item.portion }}">{{ item.request|default('', true) }}</textarea>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body p-3">
+            <h5 class="d-flex justify-content-between mb-0">
+                <span>Total:</span>
+                <span id="total-price">₹{{ "%.2f"|format(total_price) }}</span>
+            </h5>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 mt-4">
+        <button class="btn btn-success btn-lg" id="place-order-btn">Place Order</button>
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('customer.customer_menu', table=table_number) }}">Back to
+            Menu</a>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" role="alert">
+        Your cart is empty.
+    </div>
+    <div class="d-grid mt-4">
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('customer.customer_menu', table=table_number) }}">Back to
+            Menu</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableNumber = "{{ table_number }}";
+
+        let cart = {};
+        const cartItems = {{ cart_items|tojson }};
+        cartItems.forEach(item => {
+            const itemKey = `${item.id}_${item.portion}`;
+            cart[itemKey] = item;
+        });
+
+        function updateTotal() {
+            let total = 0;
+            for (const key in cart) {
+                total += cart[key].price * cart[key].quantity;
+            }
+            document.getElementById('total-price').textContent = `₹${total.toFixed(2)}`;
+        }
+
+        // Event listeners for +/- buttons
+        document.querySelectorAll('.increase-quantity, .decrease-quantity').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemKey = this.dataset.itemKey;
+                const input = this.closest('.input-group').querySelector('.quantity-display');
+                const subtotalDisplay = this.closest('.d-flex').querySelector('.item-subtotal');
+                let quantity = parseInt(input.value);
+
+                if (this.classList.contains('increase-quantity')) {
+                    quantity += 1;
+                } else if (this.classList.contains('decrease-quantity') && quantity > 0) {
+                    quantity -= 1;
+                }
+
+                if (quantity > 0) {
+                    input.value = quantity;
+                    cart[itemKey].quantity = quantity;
+                    subtotalDisplay.textContent = `${(cart[itemKey].price * quantity).toFixed(2)}`;
+                } else if (quantity === 0) {
+                    delete cart[itemKey];
+                    const card = this.closest('.col-12');
+                    card.remove();
+                }
+
+                updateTotal();
+                sendCartUpdateToServer();
+            });
+        });
+
+        // Event listener for request text area
+        document.querySelectorAll('.item-request').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                const itemKey = this.dataset.itemKey;
+                if (cart[itemKey]) {
+                    cart[itemKey].request = this.value;
+                    sendCartUpdateToServer();
+                }
+            });
+        });
+
+        function sendCartUpdateToServer() {
+            fetch("{{ url_for('customer.update_cart') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    table: tableNumber,
+                    cart: cart
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    console.log("Cart updated on server.");
+                }
+            })
+            .catch(error => console.error('Error updating cart:', error));
+        }
+
+        document.getElementById('place-order-btn').addEventListener('click', function() {
+            if (Object.keys(cart).length === 0) {
+                alert("Your cart is empty. Please add items before placing an order.");
+                return;
+            }
+
+            fetch("{{ url_for('customer.place_order') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ table_number: tableNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    window.location.href = "{{ url_for('customer.order_confirmation') }}?order_id=" + data.order_id + "&table=" + tableNumber;
+                } else {
+                    alert('Failed to place order.');
+                }
+            })
+            .catch(error => console.error('Error placing order:', error));
+        });
+    });
+</script>
+{% endblock %}
