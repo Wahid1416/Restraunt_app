@@ -20,17 +20,17 @@ from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from flask import current_app
+from flask import current_app,g
 import random
 
 
 def get_db():
     if 'db' not in g:
         g.db = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="",  # or your MySQL password
-            database="Restraunt",
+            host=os.getenv("DB_HOST", "127.0.0.1"),  # fallback for local dev
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", ""),  # your local MySQL password
+            database=os.getenv("DB_NAME", "Restraunt"),
             auth_plugin='caching_sha2_password'  # ✅ works with MySQL 8/9
         )
     return g.db
@@ -41,9 +41,14 @@ app.secret_key = "supersecret"  # change in production
 from twilio.rest import Client
 
 # Twilio credentials (from console)
-account_sid = "ACc1b4158045f261a8cb58792d620d11fd"
-auth_token = "fa323539bcd623644474800f7ef6a154"
-twilio_number = "+17627950927"   # Your Twilio phone number
+# account_sid = "ACc1b4158045f261a8cb58792d620d11fd"
+# auth_token = "fa323539bcd623644474800f7ef6a154"
+# twilio_number = "+17627950927"   # Your Twilio phone number
+
+account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+twilio_number = os.getenv("TWILIO_NUMBER")
+
 
 client = Client(account_sid, auth_token)
 
