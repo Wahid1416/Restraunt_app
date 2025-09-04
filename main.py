@@ -45,6 +45,7 @@ from twilio.rest import Client
 # auth_token = "fa323539bcd623644474800f7ef6a154"
 # twilio_number = "+17627950927"   # Your Twilio phone number
 
+
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
 twilio_number = os.getenv("TWILIO_NUMBER")
