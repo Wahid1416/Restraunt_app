@@ -1144,8 +1144,6 @@ def orders_json():
 # Route for the main bills page
 @kitchen_bp.route("/bills")
 def bills():
-    if not session.get('logged_in'):
-        return redirect(url_for("admin.login"))
     
     db = get_db()
     cursor = db.cursor(dictionary=True)
