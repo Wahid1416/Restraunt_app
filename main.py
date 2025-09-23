@@ -27,9 +27,9 @@ import random
 def get_db():
     if 'db' not in g:
         g.db = mysql.connector.connect(
-            host=os.getenv("DB_HOST", "127.0.0.1"),  # fallback for local dev
-            user=os.getenv("DB_USER", "root"),
-            password=os.getenv("DB_PASSWORD", ""),  # your local MySQL password
+            host=os.getenv("DB_HOST", "restraunt.cb4m8gycyz9y.eu-north-1.rds.amazonaws.com"),  # fallback for local dev
+            user=os.getenv("DB_USER", "admin"),
+            password=os.getenv("DB_PASSWORD", "Wahid123"),  # your local MySQL password
             database=os.getenv("DB_NAME", "Restraunt"),
             auth_plugin='caching_sha2_password'  # ✅ works with MySQL 8/9
         )
