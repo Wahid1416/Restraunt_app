@@ -144,10 +144,8 @@ def login():
         db = get_db()
         cursor = db.cursor(dictionary=True)  # ✅ dictionary=True → results as dict
         cursor.execute("SELECT * FROM login")  # ✅ no quotes around table name
-        # k = cursor.fetchall()[0]
-        print(k)
+        k = cursor.fetchall()[0]
         cursor.close()
-        # print(k)
         if k['Username']==un and k['Pass']==ps:
             session['last_activity'] = time.time()
             session['logged_in'] = True
