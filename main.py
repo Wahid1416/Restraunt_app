@@ -40,10 +40,6 @@ app.secret_key = "supersecret"  # change in production
 
 from twilio.rest import Client
 
-# Twilio credentials (from console)
-# account_sid = "ACc1b4158045f261a8cb58792d620d11fd"
-# auth_token = "fa323539bcd623644474800f7ef6a154"
-# twilio_number = "+17627950927"   # Your Twilio phone number
 
 
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
