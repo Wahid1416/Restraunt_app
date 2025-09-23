@@ -41,6 +41,10 @@ app.secret_key = "supersecret"  # change in production
 from twilio.rest import Client
 
 
+# Twilio credentials (from console)
+# account_sid = "ACc1b4158045f261a8cb58792d620d11fd"
+# auth_token = "fa323539bcd623644474800f7ef6a154"
+# twilio_number = "+17627950927"   # Your Twilio phone number
 
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
@@ -210,7 +214,7 @@ def reset_password():
         
         
         
-# In main.py, within the admin_bp blueprint
+# In app.py, within the admin_bp blueprint
 
 from datetime import date, timedelta
 
@@ -507,7 +511,7 @@ def delete_category(category_name):
     return redirect(url_for("admin.categories_page"))
 
 
-# In your main.py file, within the admin_bp blueprint
+# In your app.py file, within the admin_bp blueprint
 
 @admin_bp.route("/payment_methods", methods=["GET", "POST"])
 def payment_methods():
@@ -547,11 +551,11 @@ def payment_methods():
 
 
 
-# In your main.py file, within the admin_bp blueprint
+# In your app.py file, within the admin_bp blueprint
 
-# In your main.py file, within the admin_bp blueprint
+# In your app.py file, within the admin_bp blueprint
 
-# In your main.py file, within the admin_bp blueprint
+# In your app.py file, within the admin_bp blueprint
 
 @admin_bp.route("/reports")
 def reports():
@@ -638,7 +642,7 @@ def reports():
                            payment_methods=payment_methods)
 
 
-# In your main.py file, within the admin_bp blueprint
+# In your app.py file, within the admin_bp blueprint
 
 @admin_bp.route("/analytics")
 def analytics():
@@ -832,7 +836,7 @@ def add_to_cart():
         return "Table number is required.", 400
 
 
-# In your main.py file within the customer_bp blueprint
+# In your app.py file within the customer_bp blueprint
 
 @customer_bp.route("/checkout")
 def checkout():
@@ -966,7 +970,7 @@ app.register_blueprint(customer_bp, url_prefix="/customer")
 kitchen_bp = Blueprint("kitchen", __name__, template_folder="templates/kitchen")
 
 
-# In main.py, within the kitchen_bp blueprint
+# In app.py, within the kitchen_bp blueprint
 
 @kitchen_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -999,7 +1003,7 @@ def k_logout():
     session.pop("Kitchen_device_id",None)
     session.pop("kitchen_last_activity",None)
     return redirect(url_for("kitchen.login"))
-# In main.py, modify the existing before_kitchen_request function
+# In app.py, modify the existing before_kitchen_request function
 
 @kitchen_bp.before_request
 def before_kitchen_request():
@@ -1106,7 +1110,7 @@ def orders():
     )
 
 
-# In your main.py file, within the kitchen_bp blueprint
+# In your app.py file, within the kitchen_bp blueprint
 
 @kitchen_bp.route("/orders_json")
 def orders_json():
@@ -1131,7 +1135,7 @@ def orders_json():
     return jsonify(orders)
 
 
-# In main.py, within the customer_bp blueprint
+# In app.py, within the customer_bp blueprint
 
 
 
@@ -1175,7 +1179,7 @@ def bills():
 
 
 # Route to generate and download the PDF
-# In your main.py file, inside the kitchen_bp blueprint
+# In your app.py file, inside the kitchen_bp blueprint
 
 @kitchen_bp.route("/generate_bill_pdf/<table_no>")
 def generate_bill_pdf(table_no):
