@@ -27,13 +27,25 @@ import random
 def get_db():
     if 'db' not in g:
         g.db = mysql.connector.connect(
-            host=os.getenv("DB_HOST", "restraunt.cb4m8gycyz9y.eu-north-1.rds.amazonaws.com"),  # fallback for local dev
+            host=os.getenv("DB_HOST", "database-1.cveq8go2apfa.ap-south-1.rds.amazonaws.com"),  # fallback for local dev
             user=os.getenv("DB_USER", "admin"),
             password=os.getenv("DB_PASSWORD", "Wahid123"),  # your local MySQL password
             database=os.getenv("DB_NAME", "Restraunt"),
             auth_plugin='caching_sha2_password'  # ✅ works with MySQL 8/9
         )
     return g.db
+
+
+# def get_db():
+#     if 'db' not in g:
+#         g.db = mysql.connector.connect(
+#             host=os.getenv("DB_HOST", "localhost"),  # fallback for local dev
+#             user=os.getenv("DB_USER", "root"),
+#             password=os.getenv("DB_PASSWORD", ""),  # your local MySQL password
+#             database=os.getenv("DB_NAME", "Restraunt"),
+#             auth_plugin='caching_sha2_password'  # ✅ works with MySQL 8/9
+#         )
+#     return g.db
 # -------------------- Flask App Setup --------------------
 app = Flask(__name__)
 app.secret_key = "supersecret"  # change in production
