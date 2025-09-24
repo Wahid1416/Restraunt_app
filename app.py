@@ -1342,6 +1342,7 @@ def home():
 def admin():
     return redirect(url_for("admin.dashboard"))
 
+
 @app.route("/kitchen")
 def kitchen():
     return redirect(url_for("kitchen.orders"))
