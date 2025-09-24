@@ -16,7 +16,6 @@ MarkupSafe==3.0.2
 multidict==6.6.4
 mysql==0.0.3
 mysql-connector-python==9.4.0
-mysqlclient==2.2.7
 pillow==11.3.0
 propcache==0.3.2
 PyJWT==2.10.1
