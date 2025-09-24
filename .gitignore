@@ -1,7 +1,7 @@
 # Database files
-restaurant.db
-
-# Optionally, ignore all databases of this type
-# *.db
-# Ignore Mac OS specific files
-.DS_Store
+#restaurant.db
+#
+## Optionally, ignore all databases of this type
+## *.db
+## Ignore Mac OS specific files
+#.DS_Store
