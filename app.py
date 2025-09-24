@@ -24,6 +24,13 @@ import random
 from datetime import date, timedelta
 from twilio.rest import Client
 
+
+# Twilio credentials (from console)
+# account_sid = "ACc1b4158045f261a8cb58792d620d11fd"
+# auth_token = "fa323539bcd623644474800f7ef6a154"
+# twilio_number = "+17627950927" # Your Twilio phone number
+
+
 # Twilio credentials (from console)
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
