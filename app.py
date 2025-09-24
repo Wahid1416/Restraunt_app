@@ -7,7 +7,6 @@ from flask import (
     flash,
     session,
     jsonify,
-    g,
     Blueprint,
     current_app,
     send_file,
