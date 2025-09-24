@@ -39,10 +39,6 @@
                     <label for="order_id" class="form-label">Order ID</label>
                     <input type="text" class="form-control" id="order_id" name="order_id" value="{{ order_id }}">
                 </div>
-                <div class="col-md-1">
-                    <label for="table_no" class="form-label">Table No.</label>
-                    <input type="text" class="form-control" id="table_no" name="table_no" value="{{ table_no }}">
-                </div>
                 <div class="col-md-2">
                     <label for="payment_type" class="form-label">Payment Type</label>
                     <select id="payment_type" name="payment_type" class="form-select">
@@ -90,9 +86,9 @@
                         <td>{{ order.item }}</td>
                         <td>{{ order.type }}</td>
                         <td>{{ order.Quantity }}</td>
-                        <td>₹{{ "%.2f"|format(order.price) }}</td>
-                        <td>{{ order.date_time.strftime('%Y-%m-%d') }}</td>
-                        <td>{{ order.date_time.strftime('%H:%M:%S') }}</td>
+                        <td>₹{{ order.price }}</td>
+                        <td>{{ datetime.fromisoformat(order['date_time']).strftime('%Y-%m-%d') }}</td>
+                        <td>{{ datetime.fromisoformat(order['date_time']).strftime('%H:%M:%S') }}</td>
                         <td>{{ order.payment_type }}</td>
                     </tr>
                     {% endfor %}

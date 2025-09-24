@@ -23,6 +23,7 @@ from reportlab.lib import colors
 import random
 from datetime import date, timedelta
 from twilio.rest import Client
+from datetime import datetime
 
 
 
@@ -580,10 +581,19 @@ def reports():
 	to_date = request.args.get('to_date')
 	from_time = request.args.get('from_time')
 	to_time = request.args.get('to_time')
-	order_id = request.args.get('order_id')
-	table_no = request.args.get('table_no')
+	order_id = None if request.args.get('order_id')=="None" else request.args.get('order_id')
 	payment_type = request.args.get('payment_type')
-	item_name = request.args.get('item_name')
+	item_name = None if request.args.get('item_name')=="None" else request.args.get('item_name')
+	
+	# print(from_date, to_date, from_time, to_time, order_id, payment_type, item_name)
+	print("from_date:", from_date)
+	print("to_date:", to_date)
+	print("from_time:", from_time)
+	print("to_time:", to_time)
+	print("order_id:", order_id)
+	print("payment_type:", payment_type)
+	print("item_name:", item_name)
+	
 	
 	query = "SELECT * FROM All_Orders"
 	conditions = []
@@ -608,9 +618,7 @@ def reports():
 	if order_id:
 		conditions.append("Order_id = ?")
 		params.append(order_id)
-	if table_no:
-		conditions.append("table_no = ?")
-		params.append(table_no)
+	
 	if payment_type:
 		conditions.append("payment_type = ?")
 		params.append(payment_type)
@@ -622,8 +630,8 @@ def reports():
 		query += " WHERE " + " AND ".join(conditions)
 	
 	query += " ORDER BY date_time DESC"
-	
-	cursor.execute(query, tuple(params))
+	print(query)
+	cursor.execute(query,tuple(params))
 	all_orders = cursor.fetchall()
 	
 	total_sales_query = "SELECT SUM(Quantity * price) AS total_sales FROM All_Orders"
@@ -637,6 +645,8 @@ def reports():
 	payment_methods = [row['Payment_methods'] for row in cursor.fetchall()]
 	cursor.close()
 	
+	# print(dict(all_orders[0]))
+	# print(type(all_orders[0]['date_time']))
 	return render_template("admin/reports.html",
 	                       all_orders=all_orders,
 	                       total_sales=total_sales,
@@ -645,10 +655,10 @@ def reports():
 	                       from_time=from_time,
 	                       to_time=to_time,
 	                       order_id=order_id,
-	                       table_no=table_no,
 	                       payment_type=payment_type,
 	                       item_name=item_name,
-	                       payment_methods=payment_methods)
+	                       payment_methods=payment_methods,
+	                       datetime=datetime)
 
 
 @admin_bp.route("/analytics")
@@ -975,45 +985,37 @@ def orders():
 	cursor = db.cursor()
 	
 	if request.method == "POST":
-		if 'update_status' in request.form:
-			order_id = request.form.get('order_id')
-			new_status = request.form.get('new_status')
-			try:
-				cursor.execute(
-					"UPDATE current_order SET status = ? WHERE order_id = ?",
-					(new_status, order_id)
-				)
+		response_data = {"success": False, "message": "Invalid request."}
+		# print(request.form)
+		try:
+			if 'new_status' in request.form:
+				order_id = request.form.get('order_id')
+				new_status = request.form.get('new_status')
+				cursor.execute("UPDATE current_order SET status = ? WHERE order_id = ?", (new_status, order_id))
 				db.commit()
-				flash("Order status updated!", "success")
-			except sqlite3.Error as err:
-				flash(f"Error updating status: {err}", "danger")
+				response_data = {"success": True, "message": "Order status updated!"}
+			
+			elif 'quantity' in request.form:
+				item_id = request.form.get('item_id')
+				new_quantity = request.form.get('quantity')
+				cursor.execute("UPDATE current_order SET quantity = ? WHERE id = ?", (new_quantity, item_id))
+				db.commit()
+				response_data = {"success": True, "message": "Item quantity updated!"}
+			
+			elif 'item_id' in request.form:
+				item_id = request.form.get('item_id')
+				cursor.execute("DELETE FROM current_order WHERE id = ?", (item_id,))
+				db.commit()
+				response_data = {"success": True, "message": "Order item deleted successfully!"}
 		
-		elif 'update_quantity' in request.form:
-			item_id = request.form.get('item_id')
-			new_quantity = request.form.get('quantity')
-			try:
-				cursor.execute(
-					"UPDATE current_order SET quantity = ? WHERE id = ?",
-					(new_quantity, item_id)
-				)
-				db.commit()
-				flash("Item quantity updated!", "success")
-			except sqlite3.Error as err:
-				flash(f"Error updating quantity: {err}", "danger")
+		except sqlite3.Error as err:
+			response_data = {"success": False, "message": f"Database error: {err}"}
 		
-		elif 'delete_item' in request.form:
-			item_id = request.form.get('item_id')
-			try:
-				cursor.execute(
-					"DELETE FROM current_order WHERE id = ?",
-					(item_id,)
-				)
-				db.commit()
-				flash("Order item deleted successfully!", "danger")
-			except sqlite3.Error as err:
-				flash(f"Error deleting item: {err}", "danger")
-		return redirect(url_for("kitchen.orders"))
+		finally:
+			cursor.close()
+			return jsonify(response_data)
 	
+	# This block runs for GET requests
 	cursor.execute("SELECT * FROM current_order ORDER BY table_no")
 	raw_orders = cursor.fetchall()
 	
@@ -1027,6 +1029,7 @@ def orders():
 				'status': item['status']
 			}
 		orders[order_id]['items'].append(item)
+	# print(orders)
 	
 	is_table_empty = len(raw_orders) == 0
 	cursor.close()
@@ -1050,10 +1053,10 @@ def orders_json():
 				'items': [],
 				'status': item['status']
 			}
-		orders[order_id]['items'].append(item)
+		# Convert the Row object to a dictionary before appending
+		orders[order_id]['items'].append(dict(item))
 	
 	return jsonify(orders)
-
 
 @kitchen_bp.route("/bills")
 def bills():
